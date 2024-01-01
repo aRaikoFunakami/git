@@ -30,6 +30,7 @@ static int match_stat(struct cache_entry *ce, struct stat *st)
 	return changed;
 }
 
+/*
 static void show_differences(struct cache_entry *ce, struct stat *cur,
 	void *old_contents, unsigned long long old_size)
 {
@@ -41,6 +42,22 @@ static void show_differences(struct cache_entry *ce, struct stat *cur,
 	fwrite(old_contents, old_size, 1, f);
 	pclose(f);
 }
+*/
+
+static void show_differences(struct cache_entry *ce, struct stat *cur,
+                             void *old_contents, unsigned long long old_size) {
+    char temp_file[] = "/tmp/show_diff.XXXXXX";
+    int fd = mkstemp(temp_file);
+    write(fd, old_contents, old_size);
+    close(fd);
+
+    static char cmd[1000];
+    snprintf(cmd, sizeof(cmd), "diff -u %s %s", temp_file, ce->name);
+    system(cmd);
+
+    unlink(temp_file);
+}
+
 
 int main(int argc, char **argv)
 {
